@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: webapp-secure-db
+    environment:
+      ACCEPT_EULA: 'Y'
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./db-init:/usr/config
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - secure-network
+
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: /bin/bash -c "/opt/mssql-tools/bin/sqlcmd -S db -U sa -P $${SA_PASSWORD} -i /usr/config/init-db.sql"
+    environment:
+      SA_PASSWORD: ${SA_PASSWORD}
+    networks:
+      - secure-network
+
+  backend:
+    build: ./backend
+    container_name: webapp-secure-backend
+    environment:
+      - PORT=3000
+      - DB_HOST=db
+      - DB_USER=apidemo
+      - DB_PASSWORD=${API_DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+      - secure-network
+
+  frontend:
+    build: ./frontend
+    container_name: webapp-secure-frontend
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - secure-network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  secure-network:
+    driver: bridge
