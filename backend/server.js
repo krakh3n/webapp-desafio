@@ -39,12 +39,12 @@ app.use('/api/', limiter);
 
 const USERS = [{
     username: 'admin',
-    passwordHash: '$2a$10$X7bH7P5v9XvKj9VbZ6b8e.O3G2Z7uBv8Y6zH2kG5f6b7c8d9e1f2g' 
+    passwordHash: '$2a$10$JeDkXv8KBRA2JHV4hZcdv.D5ZWtLgouBvYisRWZn/tR9w7u.G3jAy' 
 }];
 
 app.get('/health', (req, res) => {
     logger.info('Healthcheck consultado de forma exitosa');
-    res.status(200).json({ status: 'UP', database_user: process.env.DB_USER, timestamp: new Date() });
+    res.status(200).json({ status: 'UP', timestamp: new Date() });
 });
 
 app.post('/login', async (req, res, next) => {
@@ -89,8 +89,7 @@ const authenticateJWT = (req, res, next) => {
 app.get('/data', authenticateJWT, (req, res) => {
     logger.info(`Usuario ${req.user.username} consumiendo datos con rol limitado 'apidemo'`);
     res.status(200).json({ 
-        message: "Datos de negocio expuestos bajo menor privilegio.",
-        db_connected_as: process.env.DB_USER
+        message: "Datos de negocio expuestos bajo menor privilegio."
     });
 });
 
