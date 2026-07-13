@@ -24,10 +24,10 @@ jobs:
         run: npm install
 
       - name: 🐳 Validar sintaxis de Docker Compose
-        run: docker-compose config
+        run: docker compose config
 
       - name: 🏗️ Construir imágenes de Docker
-        run: docker-compose build
+        run: docker compose build
 
   merge-and-release:
     needs: build-and-validate
