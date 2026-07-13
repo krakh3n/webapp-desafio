@@ -17,11 +17,15 @@ jobs:
       - name: 🟢 Configurar entorno Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: 📦 Instalar dependencias del Backend
         working-directory: ./backend
         run: npm install
+
+      - name: 🧪 Ejecutar Pruebas Unitarias
+        working-directory: ./backend
+        run: npm test
 
       - name: 🐳 Validar sintaxis de Docker Compose
         run: docker compose config
