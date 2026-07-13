@@ -55,6 +55,7 @@
 
     <script>
         let tempUser = '';
+        let tempPassword = ''; 
         let currentToken = '';
         let dashboardInterval;
 
@@ -75,7 +76,8 @@
 
             if (res.status === 403 && data.requirePasswordChange) {
                 tempUser = data.tempUser;
-                document.getElementById('password').value = ''; // Guardar para el paso 2
+                tempPassword = p; 
+                document.getElementById('password').value = '';
                 hide('login-view');
                 show('change-pwd-view');
             } else if (res.ok) {
@@ -89,7 +91,7 @@
 
         async function changePassword() {
             const np = document.getElementById('new-password').value;
-            const op = document.getElementById('password').value; // Usamos la que tipeó antes
+            const op = tempPassword; 
             const err = document.getElementById('pwd-error');
 
             const res = await fetch('/api/change-password', {
@@ -102,6 +104,7 @@
                 alert("Contraseña actualizada. Por favor, iniciá sesión.");
                 document.getElementById('new-password').value = '';
                 document.getElementById('password').value = '';
+                tempPassword = ''; 
                 hide('change-pwd-view');
                 show('login-view');
             } else {
@@ -130,7 +133,6 @@
                 document.getElementById('dash-uptime').innerText = data.uptime;
                 document.getElementById('dash-users').innerText = data.activeUsersCount;
                 
-                // Formatear logs
                 const logsText = data.logs.map(l => {
                     try { return JSON.parse(l).message || l; } catch { return l; }
                 }).join('\n');
