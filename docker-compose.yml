@@ -30,6 +30,7 @@ services:
     entrypoint: /bin/bash -c "/opt/mssql-tools18/bin/sqlcmd -S db -U sa -P $${SA_PASSWORD} -C -i /usr/config/init-db.sql"
     environment:
       SA_PASSWORD: ${SA_PASSWORD}
+      API_DB_PASSWORD: ${API_DB_PASSWORD}
     networks:
       - secure-network
 
