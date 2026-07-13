@@ -34,32 +34,57 @@ Solución mínima de integración operativa que despliega una aplicación web se
 4. **Endpoint Habilitados:**
 
     Health: 
-    CMD o POSTMAN: curl.exe -k --location "https://localhost/api/health" -H "Content-Type: application/json"
-    Navegador: https://localhost/api/health
+    CMD o POSTMAN: 
+    ```bash
+    curl.exe -k --location "https://localhost/api/health" -H "Content-Type: application/json"
+    ```
+    Navegador: 
+    ```bash
+    https://localhost/api/health
+    ```
 
     Token: 
-    CMD o POSTMAN: curl.exe -k -X POST https://localhost/api/login -H "Content-Type: application/json" -d "{\"username\":\"admin\", \"password\":\"PASSWORD\"}"
-    Navegador: https://localhost
-
+    CMD o POSTMAN: 
+    ```bash
+    curl.exe -k -X POST https://localhost/api/login -H "Content-Type: application/json" -d "{\"username\":\"admin\", \"password\":\"PASSWORD\"}"
+    ```
+    Navegador: 
+    ```bash
+    https://localhost
+    ```
     Dashboard:
-    CMD o POSTMAN: curl.exe -k --location "https://localhost/api/dashboard" -H "Content-Type: application/json" --header "Authorization: Bearer TOKEN"
-    Navegador: https://localhost/
+    CMD o POSTMAN: 
+    ```bash
+    curl.exe -k --location "https://localhost/api/dashboard" -H "Content-Type: application/json" --header "Authorization: Bearer TOKEN"
+    ```
+    Navegador: 
+    ```bash
+    https://localhost/
+    ```
 
 ## Supuestos y Decisiones Tomadas
 
-    Arquitectura de red: Se configuró una red privada en Docker (secure-network). El backend y la base de datos no exponen puertos al exterior (excepto el 1433 local para debug). Todo el tráfico externo entra exclusivamente por el proxy reverso Nginx.
+    **Arquitectura de red:**
+     Se configuró una red privada en Docker (secure-network). El backend y la base de datos no exponen puertos al exterior (excepto el 1433 local para debug). Todo el tráfico externo entra exclusivamente por el proxy reverso Nginx.
 
-    Seguridad de Base de Datos: Se aplica el principio de menor privilegio. Se utiliza un contenedor efímero (db-init) para ejecutar el script SQL que inicializa las tablas y crea el usuario limitado apidemo, evitando que la API se conecte como sa(sysadmin).
+    **Seguridad de Base de Datos:**
+     Se aplica el principio de menor privilegio. Se utiliza un contenedor efímero (db-init) para ejecutar el script SQL que inicializa las tablas y crea el usuario limitado apidemo, evitando que la API se conecte como sa(sysadmin).
 
-    Seguridad de Aplicación: Mínima exposición de datos sin token. Requiere cambio de clave de forma predeterminada. Portal de Login. Registro de accesos.
+    **Seguridad de Aplicación:**
+     Mínima exposición de datos sin token. Requiere cambio de clave de forma predeterminada. Portal de Login. Registro de accesos.
 
-    Test: Se incluye un test de funcionamiento de encriptación.
+    **Testing:**
+     Se incluye un test de funcionamiento de encriptación.
 
-    CI/CD: Se bloqueo deploy a rama Main. Se estableció un flujo GitFlow simplificado. El pipeline de GitHub Actions se dispara en develop, corre análisis estático, pruebas unitarias y validación de contenedores. Si es exitoso, promueve automáticamente a main y genera un Release.
+    **CI/CD:**
+     Se bloqueo deploy a rama Main. Se estableció un flujo GitFlow simplificado. El pipeline de GitHub Actions se dispara en develop, corre análisis estático, pruebas unitarias y validación de contenedores. Si es exitoso, promueve automáticamente a main y genera un Release.
 
 ## Límites Conocidos y Problemas Pendientes
-    Certificados: Se utilizan certificados SSL/TLS autofirmados, aptos solo para desarrollo/testing.
+    **Certificados:**
+     Se utilizan certificados SSL/TLS autofirmados, aptos solo para desarrollo/testing.
 
-    Persistencia de Logs: Actualmente, Winston escribe los logs del backend dentro del volumen efímero del contenedor.
+    **Persistencia de Logs:**
+     Actualmente, Winston escribe los logs del backend dentro del volumen efímero del contenedor.
 
-    Estado en Memoria: El contador de usuarios activos reside en la memoria de Node.js, lo que impide escalar el backend horizontalmente de forma directa.
+    **Estado en Memoria:**
+     El contador de usuarios activos reside en la memoria de Node.js, lo que impide escalar el backend horizontalmente de forma directa.
