@@ -33,7 +33,7 @@ Solución mínima de integración operativa que despliega una aplicación web se
 
 4. **Endpoint Habilitados:**
 
-    Health: 
+    1. **Health:**
     CMD o POSTMAN: 
     ```bash
     curl.exe -k --location "https://localhost/api/health" -H "Content-Type: application/json"
@@ -43,7 +43,7 @@ Solución mínima de integración operativa que despliega una aplicación web se
     https://localhost/api/health
     ```
 
-    Token: 
+    2. **Token:** 
     CMD o POSTMAN: 
     ```bash
     curl.exe -k -X POST https://localhost/api/login -H "Content-Type: application/json" -d "{\"username\":\"admin\", \"password\":\"PASSWORD\"}"
@@ -52,7 +52,7 @@ Solución mínima de integración operativa que despliega una aplicación web se
     ```bash
     https://localhost
     ```
-    Dashboard:
+    3. **Dashboard:**
     CMD o POSTMAN: 
     ```bash
     curl.exe -k --location "https://localhost/api/dashboard" -H "Content-Type: application/json" --header "Authorization: Bearer TOKEN"
@@ -62,29 +62,30 @@ Solución mínima de integración operativa que despliega una aplicación web se
     https://localhost/
     ```
 
-## Supuestos y Decisiones Tomadas
+## Supuestos y Decisiones Tomadas:
 
-    **Arquitectura de red:**
+**Arquitectura de red:**
      Se configuró una red privada en Docker (secure-network). El backend y la base de datos no exponen puertos al exterior (excepto el 1433 local para debug). Todo el tráfico externo entra exclusivamente por el proxy reverso Nginx.
 
-    **Seguridad de Base de Datos:**
+**Seguridad de Base de Datos:**
      Se aplica el principio de menor privilegio. Se utiliza un contenedor efímero (db-init) para ejecutar el script SQL que inicializa las tablas y crea el usuario limitado apidemo, evitando que la API se conecte como sa(sysadmin).
 
-    **Seguridad de Aplicación:**
+**Seguridad de Aplicación:**
      Mínima exposición de datos sin token. Requiere cambio de clave de forma predeterminada. Portal de Login. Registro de accesos.
 
-    **Testing:**
+**Testing:**
      Se incluye un test de funcionamiento de encriptación.
 
-    **CI/CD:**
+**CI/CD:**
      Se bloqueo deploy a rama Main. Se estableció un flujo GitFlow simplificado. El pipeline de GitHub Actions se dispara en develop, corre análisis estático, pruebas unitarias y validación de contenedores. Si es exitoso, promueve automáticamente a main y genera un Release.
 
 ## Límites Conocidos y Problemas Pendientes
-    **Certificados:**
+
+**Certificados:**
      Se utilizan certificados SSL/TLS autofirmados, aptos solo para desarrollo/testing.
 
-    **Persistencia de Logs:**
+**Persistencia de Logs:**
      Actualmente, Winston escribe los logs del backend dentro del volumen efímero del contenedor.
 
-    **Estado en Memoria:**
+**Estado en Memoria:**
      El contador de usuarios activos reside en la memoria de Node.js, lo que impide escalar el backend horizontalmente de forma directa.
