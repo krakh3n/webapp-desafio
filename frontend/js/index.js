@@ -4,10 +4,29 @@
         let currentToken = '';
         let dashboardInterval;
 
-        document.getElementById('login-btn').addEventListener('click', login);
+        document.getElementById('login-btn').addEventListener('click', login) 
         document.getElementById('change-pwd-btn').addEventListener('click', changePassword);
         document.getElementById('logout-btn').addEventListener('click', logout);
+        
+        document.getElementById('password').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Evita comportamientos raros por defecto
+                login();
+            }
+        });
+        document.getElementById('username').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                login();
+            }
+        });
 
+        document.getElementById('new-password').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                changePassword();
+            }
+        });
 
         const show = (id) => document.getElementById(id).classList.remove('hidden');
         const hide = (id) => document.getElementById(id).classList.add('hidden');
