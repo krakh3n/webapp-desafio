@@ -1,0 +1,59 @@
+name: CI/CD - Validación y Promoción Automática
+
+on:
+  push:
+    branches: [ "develop" ]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎️ Clonar el repositorio
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurar entorno Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 📦 Instalar dependencias del Backend
+        working-directory: ./backend
+        run: npm install
+
+      - name: 🐳 Validar sintaxis de Docker Compose
+        run: docker-compose config
+
+      - name: 🏗️ Construir imágenes de Docker
+        run: docker-compose build
+
+  merge-and-release:
+    needs: build-and-validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎️ Clonar el repositorio (con historial completo)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: 🔀 Promover código a la rama main
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          git checkout main
+          git merge origin/develop --no-ff -m "chore: auto-merge develop to main tras CI exitoso"
+          git push origin main
+
+      - name: 🏷️ Generar Tag y Crear Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="v1.0.${{ github.run_number }}"
+          
+          gh release create "$TAG_NAME" \
+            --target main \
+            --title "Versión $TAG_NAME" \
+            --notes "🚀 Despliegue y validación automática exitosa originada desde la rama develop."
