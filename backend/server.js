@@ -31,7 +31,6 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Configuración SQL Server
 const dbConfig = {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -40,11 +39,9 @@ const dbConfig = {
     options: { encrypt: true, trustServerCertificate: true }
 };
 
-// Tracking simple en memoria para MVP
 const activeUsers = new Set();
 const startTime = Date.now();
 
-// Inicialización de la DB y creación de admin por defecto
 async function initializeDB() {
     try {
         const pool = await sql.connect(dbConfig);
@@ -63,7 +60,11 @@ async function initializeDB() {
 }
 initializeDB();
 
-// 1. Endpoint de Login Refactorizado
+app.get('/health', (req, res) => {
+    logger.info('Healthcheck consultado de forma exitosa');
+    res.status(200).json({ status: 'UP', uptime: Math.floor((Date.now() - startTime) / 1000) + " seconds", timestamp: new Date() });
+});
+
 app.post('/login', async (req, res, next) => {
     try {
         const { username, password } = req.body;
@@ -94,7 +95,6 @@ app.post('/login', async (req, res, next) => {
     }
 });
 
-// 2. Endpoint de Cambio de Contraseña (Público temporal, validando login anterior)
 app.post('/change-password', async (req, res, next) => {
     try {
         const { username, currentPassword, newPassword } = req.body;
@@ -121,7 +121,6 @@ app.post('/change-password', async (req, res, next) => {
     }
 });
 
-// Middleware JWT
 const authenticateJWT = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (authHeader) {
@@ -134,11 +133,10 @@ const authenticateJWT = (req, res, next) => {
     } else res.sendStatus(401);
 };
 
-// 3. Endpoint del Dashboard
+
 app.get('/dashboard', authenticateJWT, (req, res) => {
     const uptimeSeconds = Math.floor((Date.now() - startTime) / 1000);
     
-    // Leer últimos logs (MVP simple: lee archivo y toma ultimas 10 lineas)
     let recentLogs = [];
     try {
         const logData = fs.readFileSync(path.join(__dirname, 'logs/combined.log'), 'utf8');
